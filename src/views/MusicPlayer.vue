@@ -47,9 +47,6 @@
 
     <!-- 控制按钮 -->
     <div class="controls">
-      <button class="control-btn" @click="toggleLoop">
-        <ion-icon :name="loopMode === 'all' ? 'repeat-outline' : 'repeat-one-outline'"></ion-icon>
-      </button>
       <button class="control-btn" @click="playPrevious">
         <ion-icon name="play-skip-back-outline"></ion-icon>
       </button>
@@ -58,9 +55,6 @@
       </button>
       <button class="control-btn" @click="playNext">
         <ion-icon name="play-skip-forward-outline"></ion-icon>
-      </button>
-      <button class="control-btn" @click="toggleFavorite">
-        <ion-icon :name="isFavorite ? 'heart' : 'heart-outline'"></ion-icon>
       </button>
     </div>
 
@@ -79,34 +73,11 @@
         @input="setVolume"
       >
     </div>
-
-    <!-- 播放列表 -->
-    <div class="playlist-section">
-      <h3 class="playlist-title">
-        <ion-icon name="list-outline"></ion-icon> 播放列表
-      </h3>
-      <div class="playlist-list">
-        <div
-          v-for="song in playQueue"
-          :key="song.id"
-          class="queue-item"
-          :class="{ active: currentSong?.id === song.id }"
-          @click="playSong(song)"
-        >
-          <div class="queue-item-info">
-            <span class="queue-item-name">{{ song.name }}</span>
-            <span class="queue-item-singer">{{ song.singer }}</span>
-          </div>
-          <span class="queue-item-duration">{{ formatTime(song.duration || 0) }}</span>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import player from '@/utils/player'
-import storage from '@/utils/storage'
 import Vue from 'vue'
 
 export default {
@@ -121,8 +92,7 @@ export default {
       isMuted: false,
       loopMode: 'all', // 'all' 或 'one'
       isDragging: false,
-      playQueue: [],
-      isFavorite: false
+      playQueue: []
     }
   },
 
@@ -275,36 +245,6 @@ export default {
     toggleMute () {
       this.isMuted = !this.isMuted
       player.audio.muted = this.isMuted
-    },
-
-    // 循环模式切换
-    toggleLoop () {
-      this.loopMode = this.loopMode === 'all' ? 'one' : 'all'
-    },
-
-    // 收藏功能
-    toggleFavorite () {
-      if (!this.currentSong) return
-
-      let favorites = storage.get('favorites') || []
-      const songId = String(this.currentSong.id)
-
-      if (this.isFavorite) {
-        favorites = favorites.filter(id => id !== songId)
-        this.$message.success('已取消收藏')
-      } else {
-        favorites.push(songId)
-        this.$message.success('收藏成功')
-      }
-
-      storage.set('favorites', favorites)
-      this.isFavorite = !this.isFavorite
-    },
-
-    checkFavoriteStatus () {
-      if (!this.currentSong) return
-      const favorites = storage.get('favorites') || []
-      this.isFavorite = favorites.includes(String(this.currentSong.id))
     },
 
     // 加载播放队列
